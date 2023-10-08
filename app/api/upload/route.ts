@@ -6,16 +6,18 @@ export async function POST(request: NextRequest) {
 
   const files = data.getAll('file') as unknown as File[];
 
-  const users: ChatUser[] = await files.reduce(async (prev: any, file) => {
+  const users: any = await files.reduce(async (prev: any, file) => {
+    // Return fail if file is not txt file (backend validation)
     if (file.type !== 'text/plain') {
       return NextResponse.json({ success: false });
     }
 
+    // Read the file
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const lines = buffer.toString().split(/(?=<)/g); // split but keep the delimiter
 
-    let newUsers: ChatUser[] = await prev;
+    let newUsers: ChatUser[] = [];
 
     for (const line of lines) {
       // Match user decalration
@@ -37,11 +39,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return newUsers;
+    // Sort users by word count in descending order
+    const sortedUsers = newUsers.sort((a, b) => b.wordsCount - a.wordsCount);
+
+    return [...(await prev), sortedUsers];
   }, Promise.resolve([]));
 
-  // Sort users by word count in descending order
-  const sortedUsers = users.sort((a, b) => b.wordsCount - a.wordsCount);
-
-  return NextResponse.json({ sortedUsers });
+  return NextResponse.json(users);
 }

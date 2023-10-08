@@ -1,13 +1,14 @@
 'use client';
 
-import { Button } from '@nextui-org/button';
-import { Card, CardBody } from '@nextui-org/card';
+import { Button, ButtonGroup } from '@nextui-org/button';
+import { Card, CardBody, CardFooter } from '@nextui-org/card';
 import { useState } from 'react';
-import type { ChatUser } from '@/interfaces/ChatUser';
+import type { ChattiestRank } from '@/interfaces/ChatUser';
 
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [chattiestRank, setChattiestRank] = useState<ChatUser[]>([]);
+  const [chattiestResult, setChattiestResult] = useState<ChattiestRank[]>([]);
+  const [resultPage, setResultPage] = useState<number>(1);
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -39,7 +40,7 @@ export default function Home() {
           body: formData,
         });
         const result = await res.json();
-        setChattiestRank(result.sortedUsers);
+        setChattiestResult(result);
       } catch (err) {
         //TODO: handle error
         console.error(err);
@@ -96,17 +97,44 @@ export default function Home() {
         <Button onClick={handleFileUpload}>Upload</Button>
       </div>
       <div className="flex flex-col gap-2 items-start">
-        <h1 className="font-bold">Results:</h1>
+        <h1 className="font-bold">
+          {chattiestResult.length > 1
+            ? `Results for file ${resultPage}: `
+            : 'Result'}
+        </h1>
         <Card className="w-[200px] h-[300px]">
           <CardBody>
-            {chattiestRank?.map((user, index) => {
-              return (
-                <p key={`result-${index}`}>
-                  {user.name} - {user.wordsCount} words
-                </p>
-              );
-            })}
+            {chattiestResult.length > 0 &&
+              chattiestResult[resultPage - 1]?.map((user, index) => {
+                return (
+                  <p key={`result-${index}`}>
+                    {user.name} - {user.wordsCount} words
+                  </p>
+                );
+              })}
           </CardBody>
+          {chattiestResult.length > 1 && (
+            <CardFooter className="justify-center">
+              <ButtonGroup>
+                <Button
+                  disabled={resultPage <= 1}
+                  onClick={() => {
+                    setResultPage(resultPage - 1);
+                  }}
+                >
+                  {'<'}
+                </Button>
+                <Button
+                  disabled={resultPage >= chattiestResult.length}
+                  onClick={() => {
+                    setResultPage(resultPage + 1);
+                  }}
+                >
+                  {'>'}
+                </Button>
+              </ButtonGroup>
+            </CardFooter>
+          )}
         </Card>
       </div>
     </main>

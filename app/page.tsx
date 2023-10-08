@@ -55,10 +55,10 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-evenly p-24">
+    <main className="flex flex-col lg:flex-row min-h-screen items-center justify-evenly p-24">
       <div className="flex flex-col gap-2 items-start">
         <h1 className="font-bold">Upload a log file (.txt)</h1>
-        <Card className="min-w-[500px] min-h-[300px]">
+        <Card className="min-w-[200px] sm:min-w-[500px] min-h-[300px]">
           <CardBody
             className="justify-center items-center"
             onDragOver={(e) => e.preventDefault()}
